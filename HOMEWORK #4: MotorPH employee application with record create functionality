@@ -1,0 +1,67 @@
+Video link: https://drive.google.com/file/d/1EdE0hueygE4JRm943KQyUe94BA2cb3oy/view?usp=drive_link
+
+package MotoPHPayrollSystem.java;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.Scanner;
+
+public class motorPHcvsvFile {
+    public static void main(String[] args) {
+        
+        
+          Scanner scanner = new Scanner(System.in);
+            System.out.print("Enter Employee Number: ");
+            String userInput = scanner.nextLine();
+            String employeeDetails = getEmployeeDetails(userInput);
+            
+            if (!employeeDetails.isEmpty()) {
+                String[] employee = employeeDetails.split(";");
+                System.out.println("Employee Number                 Name                            Birthday                        Status");
+                String formattedEmployee1 = String.format("%-30s  %-30s  %-30s  %-30s",
+                        employee[0], employee[1] + ", " + employee[2], employee[3], employee[11]);
+                System.out.println(formattedEmployee1);
+                System.out.println("Address");
+                System.out.println(employee[4]);
+                System.out.println("");
+                System.out.println("Position");
+                System.out.println(employee[11]);
+                System.out.println("");
+                System.out.println("Immediate Supervisor");
+                System.out.println(employee[12]);
+                System.out.println("");
+                System.out.println("Philhealth Number               TIN                             SSS                             Pag-ibig");
+                String formattedEmployee2 = String.format("%-30s  %-30s  %-30s  %-30s",
+                        employee[7], employee[8], employee[6], employee[9]);
+                System.out.println(formattedEmployee2);
+
+            } else {
+                System.out.println("No data found. Please try again.");
+            }
+            }
+            public static String getEmployeeDetails(String employeeId) {
+                String path = "/Users/DELL/OneDrive/Desktop/MotorPH Employee Data - Employee Details.csv";
+                try (BufferedReader reader = new BufferedReader(new FileReader(path))) {
+                    reader.readLine(); //
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        String[] row = line.split(",(?=([^\"]\"[^\"]\")[^\"]$)");
+                        if (row[0].trim().equals(employeeId)) {
+                            return line.replaceAll(",(?=([^\"]\"[^\"]\")[^\"]$)", ";");
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                return "";
+            }
+            public static double parseDoubleDefault(String value) {
+                try {
+                    return Double.parseDouble(value);
+                } catch (NumberFormatException e) {
+                    return 0.0;
+    }
+            }
+    }
