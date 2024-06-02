@@ -1,0 +1,93 @@
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.Scanner;
+
+public class MotorPHPayrollSystem {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        // User Authentication
+        System.out.print("Enter Username: ");
+        String username = scanner.nextLine();
+        System.out.print("Enter Password: ");
+        String password = scanner.nextLine();
+
+        if (authenticateUser(username, password)) {
+            System.out.print("Enter Employee Number: ");
+            String userInput = scanner.nextLine();
+            scanner.close();
+
+            String employeeDetails = getEmployeeDetails(userInput);
+
+            if (!employeeDetails.isEmpty()) {
+                String[] employee = employeeDetails.split(";");
+                System.out.println("Employee Number                 Name                            Birthday                        Status");
+                String formattedEmployee1 = String.format("%-30s  %-30s  %-30s  %-30s",
+                        employee[0], employee[1] + ", " + employee[2], employee[3], employee[11]);
+                System.out.println(formattedEmployee1);
+                System.out.println("Address");
+                System.out.println(employee[4]);
+                System.out.println("");
+                System.out.println("Position");
+                System.out.println(employee[11]);
+                System.out.println("");
+                System.out.println("Immediate Supervisor");
+                System.out.println(employee[12]);
+                System.out.println("");
+                System.out.println("Philhealth Number               TIN                             SSS                             Pag-ibig");
+                String formattedEmployee2 = String.format("%-30s  %-30s  %-30s  %-30s",
+                        employee[7], employee[8], employee[6], employee[9]);
+                System.out.println(formattedEmployee2);
+            } else {
+                System.out.println("No data found. Please try again.");
+            }
+        } else {
+            System.out.println("Incorrect username or password. Access denied.");
+        }
+    }
+
+    public static boolean authenticateUser(String username, String password) {
+        String path = "path/to/your/authorized_accounts.csv"; // Update this to the actual path
+        try (BufferedReader reader = new BufferedReader(new FileReader(path))) {
+            String line;
+            reader.readLine(); // Skip the header line
+            while ((line = reader.readLine()) != null) {
+                String[] account = line.split(",");
+                if (account[0].trim().equals(username) && account[1].trim().equals(password)) {
+                    return true;
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("Error reading the accounts file.");
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public static String getEmployeeDetails(String employeeId) {
+        String path = "path/to/your/MotorPH Employee Data - Employee Details.csv"; // Update this to the actual path
+        try (BufferedReader reader = new BufferedReader(new FileReader(path))) {
+            reader.readLine(); // Skip the header line
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] row = line.split(",(?=([^\"]*\"[^\"]*\")*[^\"]*$)");
+                if (row[0].trim().equals(employeeId)) {
+                    return line.replaceAll(",(?=([^\"]*\"[^\"]*\")*[^\"]*$)", ";");
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("Error reading the employee details file.");
+            e.printStackTrace();
+        }
+        return "";
+    }
+
+    public static double parseDoubleDefault(String value) {
+        try {
+            return Double.parseDouble(value);
+        } catch (NumberFormatException e) {
+            return 0.0;
+        }
+    }
+}
