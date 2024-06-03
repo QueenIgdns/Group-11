@@ -1,6 +1,8 @@
+package Motorph;
+
 import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.StringReader;
 import java.util.Scanner;
 
 public class MotorPHPayrollSystem {
@@ -47,11 +49,20 @@ public class MotorPHPayrollSystem {
         }
     }
 
+    private static final String AUTHORIZED_ACCOUNTS_CSV = 
+        "username,password\n" +
+        "john_doe,securepassword123\n" +
+        "jane_smith,password456\n";
+
+    private static final String EMPLOYEE_DETAILS_CSV = 
+        "employee_id,first_name,last_name,birthday,address,position,sss_number,philhealth_number,tin,pagibig_number,immediate_supervisor,status\n" +
+        "1001,John,Doe,1980-01-01,\"123 Main St, Anytown, USA\",Software Engineer,123-45-6789,987-65-4321,123-456-789,8765-4321,Jane Smith,Active\n" +
+        "1002,Jane,Smith,1985-05-15,\"456 Elm St, Othertown, USA\",Project Manager,987-65-4321,123-45-6789,987-654-321,4321-5678,John Doe,Active\n";
+
     public static boolean authenticateUser(String username, String password) {
-        String path = "path/to/your/authorized_accounts.csv"; // Update this to the actual path
-        try (BufferedReader reader = new BufferedReader(new FileReader(path))) {
+        try (BufferedReader reader = new BufferedReader(new StringReader(AUTHORIZED_ACCOUNTS_CSV))) {
             String line;
-            reader.readLine(); // Skip the header line
+            reader.readLine(); 
             while ((line = reader.readLine()) != null) {
                 String[] account = line.split(",");
                 if (account[0].trim().equals(username) && account[1].trim().equals(password)) {
@@ -59,15 +70,14 @@ public class MotorPHPayrollSystem {
                 }
             }
         } catch (IOException e) {
-            System.out.println("Error reading the accounts file.");
+            System.out.println("Error reading the accounts data.");
             e.printStackTrace();
         }
         return false;
     }
 
     public static String getEmployeeDetails(String employeeId) {
-        String path = "path/to/your/MotorPH Employee Data - Employee Details.csv"; // Update this to the actual path
-        try (BufferedReader reader = new BufferedReader(new FileReader(path))) {
+        try (BufferedReader reader = new BufferedReader(new StringReader(EMPLOYEE_DETAILS_CSV))) {
             reader.readLine(); // Skip the header line
             String line;
             while ((line = reader.readLine()) != null) {
@@ -77,7 +87,7 @@ public class MotorPHPayrollSystem {
                 }
             }
         } catch (IOException e) {
-            System.out.println("Error reading the employee details file.");
+            System.out.println("Error reading the employee details data.");
             e.printStackTrace();
         }
         return "";
