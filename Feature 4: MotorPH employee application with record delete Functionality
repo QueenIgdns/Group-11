@@ -1,0 +1,102 @@
+package Motorph;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.Scanner;
+
+public class MotorPHPayrollSystem {
+
+    private static final String AUTHORIZED_ACCOUNTS_FILE = "authorized_accounts.csv";
+    private static final String EMPLOYEE_DETAILS_FILE = "employee_details.csv";
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        // User Authentication
+        System.out.print("Enter Username: ");
+        String username = scanner.nextLine();
+        System.out.print("Enter Password: ");
+        String password = scanner.nextLine();
+
+        if (authenticateUser(username, password)) {
+            System.out.print("Enter Employee Number: ");
+            String userInput = scanner.nextLine();
+            scanner.close();
+
+            String employeeDetails = getEmployeeDetails(userInput);
+
+            if (!employeeDetails.isEmpty()) {
+                String[] employee = employeeDetails.split(";");
+                System.out.println("Employee Number                 Name                            Birthday                        Status");
+                String formattedEmployee1 = String.format("%-30s  %-30s  %-30s  %-30s",
+                        employee[0], employee[1] + " " + employee[2], employee[3], employee[10]);
+                System.out.println(formattedEmployee1);
+                System.out.println("Address");
+                System.out.println(employee[4]);
+                System.out.println();
+                System.out.println("Position");
+                System.out.println(employee[5]);
+                System.out.println();
+                System.out.println("Immediate Supervisor");
+                System.out.println(employee[9]);
+                System.out.println();
+                System.out.println("Philhealth Number               TIN                             SSS                             Pag-ibig");
+                String formattedEmployee2 = String.format("%-30s  %-30s  %-30s  %-30s",
+                        employee[6], employee[8], employee[7], employee[9]);
+                System.out.println(formattedEmployee2);
+            } else {
+                System.out.println("No data found. Please try again.");
+            }
+        } else {
+            System.out.println("Incorrect username or password. Access denied.");
+        }
+    }
+
+    /**
+     * Authenticates the user against the CSV file data.
+     *
+     * @param username The username input.
+     * @param password The password input.
+     * @return True if the credentials match, false otherwise.
+     */
+    public static boolean authenticateUser(String username, String password) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(AUTHORIZED_ACCOUNTS_FILE))) {
+            String line;
+            reader.readLine(); // Skip header line
+            while ((line = reader.readLine()) != null) {
+                String[] account = line.split(",");
+                if (account[0].trim().equals(username) && account[1].trim().equals(password)) {
+                    return true;
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("Error reading the accounts data.");
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    /**
+     * Retrieves employee details from the CSV file based on the given employee ID.
+     *
+     * @param employeeId The ID of the employee to search for.
+     * @return A string containing the employee's details, or an empty string if not found.
+     */
+    public static String getEmployeeDetails(String employeeId) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(EMPLOYEE_DETAILS_FILE))) {
+            reader.readLine(); // Skip header line
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] row = line.split(",(?=([^\"]*\"[^\"]*\")*[^\"]*$)");
+                if (row[0].trim().equals(employeeId)) {
+                    return line.replaceAll(",(?=([^\"]*\"[^\"]*\")*[^\"]*$)", ";");
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("Error reading the employee details data.");
+            e.printStackTrace();
+        }
+        return "";
+    }
+}
