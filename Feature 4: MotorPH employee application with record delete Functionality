@@ -11,31 +11,45 @@ public class MotorPHPayrollSystem {
     private static final String EMPLOYEE_DETAILS_FILE = "employee_details.csv";
 
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
+        try (Scanner scanner = new Scanner(System.in)) {
+            boolean continueSearching = true;
+            while (continueSearching) {
+                // User Authentication
+                System.out.print("Enter Username: ");
+                String username = scanner.nextLine();
+                System.out.print("Enter Password: ");
+                String password = scanner.nextLine();
 
-        try {
-            // User Authentication
-            System.out.print("Enter Username: ");
-            String username = scanner.nextLine();
-            System.out.print("Enter Password: ");
-            String password = scanner.nextLine();
+                if (authenticateUser(username, password)) {
+                    boolean continueEmployeeSearch = true;
+                    while (continueEmployeeSearch) {
+                        System.out.print("Enter Employee Number: ");
+                        String userInput = scanner.nextLine();
 
-            if (authenticateUser(username, password)) {
-                System.out.print("Enter Employee Number: ");
-                String userInput = scanner.nextLine();
+                        String employeeDetails = getEmployeeDetails(userInput);
 
-                String employeeDetails = getEmployeeDetails(userInput);
-
-                if (!employeeDetails.isEmpty()) {
-                    displayEmployeeDetails(employeeDetails);
+                        if (!employeeDetails.isEmpty()) {
+                            displayEmployeeDetails(employeeDetails);
+                            continueEmployeeSearch = false; // Exit the loop if employee details are found
+                        } else {
+                            System.out.println("No data found for that employee. Do you want to try again? (yes/no)");
+                            String tryAgain = scanner.nextLine();
+                            if (!tryAgain.equalsIgnoreCase("yes")) {
+                                continueEmployeeSearch = false; // Exit the loop if user chooses not to try again
+                            }
+                        }
+                    }
                 } else {
-                    System.out.println("No data found. Please try again.");
+                    System.out.println("Incorrect username or password. Access denied.");
                 }
-            } else {
-                System.out.println("Incorrect username or password. Access denied.");
+
+                // Ask if the user wants to try again
+                System.out.println("Do you want to search for another employee? (yes/no)");
+                String tryAgain = scanner.nextLine();
+                if (!tryAgain.equalsIgnoreCase("yes")) {
+                    continueSearching = false; // Exit the loop if user chooses not to search for another employee
+                }
             }
-        } finally {
-            scanner.close();
         }
     }
 
@@ -58,7 +72,6 @@ public class MotorPHPayrollSystem {
             }
         } catch (IOException e) {
             System.out.println("Error reading the accounts data.");
-            e.printStackTrace();
         }
         return false;
     }
@@ -81,7 +94,6 @@ public class MotorPHPayrollSystem {
             }
         } catch (IOException e) {
             System.out.println("Error reading the employee details data.");
-            e.printStackTrace();
         }
         return "";
     }
