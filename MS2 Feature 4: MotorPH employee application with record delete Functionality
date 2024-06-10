@@ -10,32 +10,27 @@ public class motorPHcvsvFile {
             boolean continueSearching = true;
             while (continueSearching) {
                 // User Authentication
-               
-                    boolean continueEmployeeSearch = true;
-                    while (continueEmployeeSearch) {
-                         System.out.print("Enter Username: ");
-                         String username = scanner.nextLine();
-                         System.out.print("Enter Password: ");
-                         String password = scanner.nextLine();
-                        System.out.print("Enter Employee Number: ");
-                        String employeeId = scanner.nextLine();
+                boolean continueEmployeeSearch = true;
+                while (continueEmployeeSearch) {
+                    System.out.print("Enter Username: ");
+                    String username = scanner.nextLine();
+                    System.out.print("Enter Password: ");
+                    String password = scanner.nextLine();
 
-                        String employeeDetails = getEmployeeDetails(employeeId);
+                    String employeeDetails = getEmployeeDetails();
 
-                        if (!employeeDetails.isEmpty()) {
-                            displayEmployeeDetails(employeeDetails);
-                            continueEmployeeSearch = false; // Exit the loop if employee details are found
-                        } else {
-                            System.out.println("No data found for that employee. Do you want to try again? (yes/no)");
-                            String tryAgain = scanner.nextLine();
-                            if (!tryAgain.equalsIgnoreCase("yes")) {
-                                continueEmployeeSearch = false; // Exit the loop if user chooses not to try again
-                            }
+                    if (!employeeDetails.isEmpty()) {
+                        displayEmployeeDetails(employeeDetails);
+                        continueEmployeeSearch = false; // Exit the loop if employee details are found
+                    } else {
+                        System.out.println("No data found for that employee. Do you want to try again? (yes/no)");
+                        String tryAgain = scanner.nextLine();
+                        if (!tryAgain.equalsIgnoreCase("yes")) {
+                            continueEmployeeSearch = false; // Exit the loop if user chooses not to try again
                         }
                     }
-             
                 }
-
+             
                 // Ask if the user wants to try again
                 System.out.println("Do you want to search for another employee? (yes/no)");
                 String tryAgain = scanner.nextLine();
@@ -44,24 +39,30 @@ public class motorPHcvsvFile {
                 }
             }
         }
-private static boolean authenticateUser(String username, String password) {
+    }
+
+    private static boolean authenticateUser(String username, String password) {
         // TODO: Implement user authentication logic
         return false;
     }
 
-    public static String getEmployeeDetails(String employeeId) {
-        String path = "/Users/DELL/OneDrive/Desktop/MotorPH Employee Data - EmployeeDetails.csv";
-        try (BufferedReader reader = new BufferedReader(new FileReader(path))) {
-            reader.readLine(); // Skip the header row
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] row = line.split(",(?=([^\"]\"[^\"]\")[^\"]$)");
-                if (row[0].trim().equals(employeeId)) {
-                    return line.replaceAll(",(?=([^\"]\"[^\"]\")[^\"]$)", ";");
+    public static String getEmployeeDetails() {
+        try (Scanner scanner = new Scanner(System.in)) {
+            System.out.print("Enter Employee Number: ");
+            String employeeId = scanner.nextLine();
+            String path = "/Users/DELL/OneDrive/Desktop/MotorPH Employee Data - EmployeeDetails.csv";
+            try (BufferedReader reader = new BufferedReader(new FileReader(path))) {
+                reader.readLine(); // Skip the header row
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    String[] row = line.split(",(?=([^\"]\"[^\"]\")[^\"]$)");
+                    if (row[0].trim().equals(employeeId)) {
+                        return line.replaceAll(",(?=([^\"]\"[^\"]\")[^\"]$)", ";");
+                    }
                 }
+            } catch (Exception e) {
+                System.out.println("Error reading the employee details data.");
             }
-        } catch (Exception e) {
-            System.out.println("Error reading the employee details data.");
         }
         return "";
     }
