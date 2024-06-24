@@ -1,0 +1,117 @@
+package MotoPHPayrollSystem.java;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.Scanner;
+
+public class MotoPHPayrollSystem {
+    private static final String USER_CREDENTIALS_FILE = "/Users/DELL/OneDrive/Desktop/UserCredentials.csv";
+    private static final String EMPLOYEE_DETAILS_FILE = "/Users/DELL/OneDrive/Desktop/MotorPH Employee Data - EmployeeDetails.csv";
+
+    public static void main(String[] args) {
+        try (Scanner scanner = new Scanner(System.in)) {
+            boolean continueSearching = true;
+            while (continueSearching) {
+                // User Authentication
+                boolean authenticated = false;
+                while (!authenticated) {
+                    System.out.print("Enter Username: ");
+                    String username = scanner.nextLine();
+                    System.out.print("Enter Password: ");
+                    String password = scanner.nextLine();
+
+                    authenticated = authenticateUser(username, password);
+                    if (!authenticated) {
+                        System.out.println("Invalid username or password. Do you want to try again? (yes/no)");
+                        String tryAgain = scanner.nextLine();
+                        if (!tryAgain.equalsIgnoreCase("yes")) {
+                            return; // Exit the program if authentication fails and user doesn't want to retry
+                        }
+                    }
+                }
+
+                // Employee Search
+                boolean continueEmployeeSearch = true;
+                while (continueEmployeeSearch) {
+                    String employeeDetails = getEmployeeDetails();
+                    if (!employeeDetails.isEmpty()) {
+                        displayEmployeeDetails(employeeDetails);
+                        continueEmployeeSearch = false; // Exit the loop if employee details are found
+                    } else {
+                        System.out.println("No data found for that employee. Do you want to try again? (yes/no)");
+                        String tryAgain = scanner.nextLine();
+                        if (!tryAgain.equalsIgnoreCase("yes")) {
+                            continueEmployeeSearch = false; // Exit the loop if user chooses not to try again
+                        }
+                    }
+                }
+
+                // Ask if the user wants to search for another employee
+                System.out.println("Do you want to search for another employee? (yes/no)");
+                String tryAgain = scanner.nextLine();
+                if (!tryAgain.equalsIgnoreCase("yes")) {
+                    continueSearching = false; // Exit the loop if user chooses not to search for another employee
+                }
+            }
+        }
+    }
+
+    private static boolean authenticateUser(String username, String password) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(USER_CREDENTIALS_FILE))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] credentials = line.split(",");
+                if (credentials[0].trim().equals(username) && credentials[1].trim().equals(password)) {
+                    return true;
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("Error reading the user credentials data.");
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public static String getEmployeeDetails() {
+        try (Scanner scanner = new Scanner(System.in)) {
+            System.out.print("Enter Employee Number: ");
+            String employeeId = scanner.nextLine();
+            try (BufferedReader reader = new BufferedReader(new FileReader(EMPLOYEE_DETAILS_FILE))) {
+                reader.readLine(); // Skip the header row
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    String[] row = line.split(",(?=([^\"]*\"[^\"]*\")*[^\"]*$)");
+                    if (row[0].trim().equals(employeeId)) {
+                        return line.replaceAll(",(?=([^\"]*\"[^\"]*\")*[^\"]*$)", ";");
+                    }
+                }
+            } catch (IOException e) {
+                System.out.println("Error reading the employee details data.");
+                e.printStackTrace();
+            }
+        }
+        return "";
+    }
+
+    public static void displayEmployeeDetails(String employeeDetails) {
+        String[] employee = employeeDetails.split(";");
+        System.out.println("Employee Number                 Name                            Birthday                        Status");
+        String formattedEmployee1 = String.format("%-30s  %-30s  %-30s  %-30s",
+                employee[0], employee[1] + " " + employee[2], employee[3], employee[10]);
+        System.out.println(formattedEmployee1);
+        System.out.println("Address");
+        System.out.println(employee[4]);
+        System.out.println();
+        System.out.println("Position");
+        System.out.println(employee[5]);
+        System.out.println();
+        System.out.println("Immediate Supervisor");
+        System.out.println(employee[9]);
+        System.out.println();
+        System.out.println("Philhealth Number               TIN                             SSS                             Pag-ibig");
+        String formattedEmployee2 = String.format("%-30s  %-30s  %-30s  %-30s",
+                employee[6], employee[8], employee[7], employee[11]);
+        System.out.println(formattedEmployee2);
+    }
+}
