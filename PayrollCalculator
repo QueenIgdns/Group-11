@@ -1,0 +1,356 @@
+package calculator;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Scanner;
+
+public class EmployeeSalaryCalculator {
+
+    public static void main(String[] args) {
+        Database database = new Database();
+
+        // Adding employees to the database
+        for (int i = 0; i < employeeIDs.length; i++) {
+            try {
+                Employee employee = new Employee(employeeIDs[i], lastNames[i], firstNames[i],
+                        new SimpleDateFormat("MM/dd/yyyy").parse(birthDates[i]), addresses[i],
+                        phoneNumbers[i], positions[i], basicSalaries[i], hourlyRates[i],
+                        tinNumbers[i], pagIbigNumbers[i], sssNumbers[i], philhealthNumbers[i]);
+                database.addEmployee(employee);
+            } catch (ParseException e) {
+                System.out.println("Error parsing date for employee: " + e.getMessage());
+            } catch (ArrayIndexOutOfBoundsException e) {
+                System.out.println("Array index out of bounds: " + e.getMessage());
+            }
+        }
+
+        Scanner scanner = new Scanner(System.in);
+        boolean continueComputation = true;
+
+        while (continueComputation) {
+            try {
+                System.out.print("Enter employee ID: ");
+                String employeeID = scanner.nextLine();
+
+                Employee employee = database.getEmployeeById(employeeID);
+
+                if (employee == null) {
+                    System.out.println("Employee ID not found. Please enter a valid employee ID.");
+                    continue;
+                }
+
+                System.out.println("\nEmployee Details:");
+                System.out.println("ID: " + employee.getEmployeeId());
+                System.out.println("Last Name: " + employee.getLastName());
+                System.out.println("First Name: " + employee.getFirstName());
+                System.out.println("Birth Date: " + new SimpleDateFormat("MM/dd/yyyy").format(employee.getBirthDate()));
+                System.out.println("Address: " + employee.getAddress());
+                System.out.println("Phone Number: " + employee.getPhoneNumber());
+                System.out.println("Position: " + employee.getPosition());
+                System.out.println("Basic Salary: ₱" + employee.getBasicSalary());
+                System.out.println("Hourly Rate: ₱" + employee.getHourlyRate());
+                System.out.println("TIN Number: " + employee.getTinNumber());
+                System.out.println("Pag-IBIG Number: " + employee.getPagIbigNumber());
+                System.out.println("SSS Number: " + employee.getSssNumber());
+                System.out.println("PhilHealth Number: " + employee.getPhilhealthNumber());
+
+                // Prompt for login and logout times
+                System.out.print("Enter login time (ex. 08:00): ");
+                String loginTimeStr = scanner.nextLine();
+
+                System.out.print("Enter logout time (ex. 17:00): ");
+                String logoutTimeStr = scanner.nextLine();
+
+                // Calculate duration between login and logout times
+                SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm");
+                Date loginTime = dateFormat.parse(loginTimeStr);
+                Date logoutTime = dateFormat.parse(logoutTimeStr);
+
+                long durationMillis = logoutTime.getTime() - loginTime.getTime();
+                double hoursWorked = durationMillis / (1000 * 60 * 60.0);
+
+                // Subtract 1 hour for lunch break
+                hoursWorked -= 1.0;
+
+                // Calculate monthly salary based on hours worked
+                double monthlySalary = employee.calculateMonthlySalary(hoursWorked);
+
+                // Calculate overtime pay
+                double overtimePay = employee.calculateOvertimePay(hoursWorked);
+
+                // Calculate deductions
+                double philhealthDeduction = employee.calculatePhilHealthDeduction(monthlySalary);
+                double sssContribution = employee.calculateSSSContribution(monthlySalary);
+                double pagIbigContribution = employee.calculatePagIbigContribution(monthlySalary);
+                double withholdingTaxDeduction = employee.calculateWithholdingTaxDeduction(monthlySalary);
+
+                // Display deduction breakdown
+                displayDeductionBreakdown(philhealthDeduction, sssContribution, pagIbigContribution, withholdingTaxDeduction);
+
+                // Calculate total deductions and net salary
+                double totalDeductions = philhealthDeduction + sssContribution + pagIbigContribution + withholdingTaxDeduction;
+                double netSalary = monthlySalary - totalDeductions + overtimePay;
+
+                // Display total deductions and net salary
+                System.out.printf("Total Deductions: ₱%.2f\n", totalDeductions);
+                System.out.printf("Overtime Pay: ₱%.2f\n", overtimePay);
+                System.out.printf("Net Salary: ₱%.2f\n", netSalary);
+
+                System.out.print("Do you want to make another computation? (yes/no): ");
+                String input = scanner.nextLine().trim().toLowerCase();
+                continueComputation = input.equals("yes");
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid employee ID. Please enter a valid employee ID.");
+            } catch (ParseException e) {
+                System.out.println("Invalid time format. Please enter the time in HH:mm format.");
+            }
+        }
+        scanner.close();
+    }
+
+    private static void displayDeductionBreakdown(double philhealthDeduction, double sssContribution,
+                                                   double pagIbigContribution, double withholdingTaxDeduction) {
+        System.out.println("\nDeduction Breakdown:");
+        System.out.printf("PhilHealth Deduction: ₱%.2f\n", philhealthDeduction);
+        System.out.printf("SSS Contribution: ₱%.2f\n", sssContribution);
+        System.out.printf("Pag-IBIG Contribution: ₱%.2f\n", pagIbigContribution);
+        System.out.printf("Withholding Tax Deduction: ₱%.2f\n", withholdingTaxDeduction);
+    }
+
+    // Employee data
+    private static String[] employeeIDs = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10",
+            "11", "12", "13", "14", "15", "16", "17", "18", "19", "20",
+            "21", "22", "23", "24", "25", "26", "27", "28", "29", "30",
+            "31", "32", "33", "34"};
+    private static String[] lastNames = {"Doe", "Smith", "Johnson", "Garcia", "Lim", "Aquino", "Reyes",
+            "Hernandez", "Villanueva", "San Jose", "Romualdez", "Atienza",
+            "Alvaro", "Salcedo", "Lopez", "Farala", "Martinez", "Romualdez",
+            "Mata", "De Leon", "San Jose", "Rosario", "Bautista", "Lazaro",
+            "Delos Santos", "Santos", "Del Rosario", "Tolentino", "Gutierrez",
+            "Manalaysay", "Villegas", "Ramos", "Maceda", "Aguilar", "Castro",
+            "Martinez", "Santos"};
+    private static String[] firstNames = {"John", "Emily", "Michael", "Manuel III", "Antonio", "Bianca Sofia",
+            "Isabella", "Eduard", "Andrea Mae", "Brad", "Alice", "Rosie",
+            "Roderick", "Anthony", "Josie", "Martha", "Leila", "Fredrick",
+            "Christian", "Selena", "Allison", "Cydney", "Mark", "Darlene",
+            "Kolby", "Vella", "Tomas", "Jacklyn", "Percival", "Garfield",
+            "Lizeth", "Carol", "Emelia", "Delia", "John Rafael", "Carlos Ian",
+            "Beatriz"};
+    private static String[] birthDates = {"10/11/1983", "06/19/1988", "08/04/1989", "06/16/1994", "09/23/1989",
+            "02/14/1988", "03/15/1996", "05/14/1992", "09/24/1948", "03/30/1988",
+            "09/14/1993", "01/14/1987", "01/11/1942", "07/11/1970", "03/10/1985",
+            "10/21/1987", "02/20/1975", "06/24/1986", "10/06/1996", "02/12/1991",
+            "11/25/1985", "02/26/1980", "12/31/1983", "12/18/1978", "05/19/1984",
+            "12/18/1970", "08/28/1986", "12/12/1981", "08/20/1978", "04/14/1973",
+            "01/27/1989", "02/09/1992", "11/16/1990", "08/07/1990"};
+    private static String[] addresses = {"Valero Carpark Building Valero Street 1227, Makati City",
+            "San Antonio De Padua 2, Block 1 Lot 8 and 2, Dasmarinas, Cavite",
+            "Rm. 402 4/F Jiao Building Timog Avenue, Barangay Sacred Heart 1103, Quezon City",
+            "7th Floor Unit 22 Tower 1 6780 Ayala Avenue Legaspi Village 1229, Makati City",
+            "Unit 2010 One Shangrila Place North Tower, 1, Barangay Wack Wack, Mandaluyong City",
+            "Victoria Court Building, EDSA, Makati City, Metro Manila",
+            "Basement 2 QCC Bldg. Edsa 114 West Ave. Quezon City",
+            "Km 6 Sasa Davao City", "12f Hsbc Centre 3058 Fifth Ave Bonifacio Global City Taguig City",
+            "City Land, Shooing Arcade 1212 Mandaluyong City, 46th Floor Philamlife Tower, Paseo de Roxas",
+            "Felix Avenue, San Isidro, Cainta, Rizal", "1027 Quezon Ave, Brgy. Sta. Cruz, 1005 Quezon City",
+            "Makati City", "Quezon City", "Makati City", "Quezon City", "Makati City", "Quezon City",
+            "Makati City", "Quezon City", "Makati City", "Quezon City", "Makati City", "Quezon City",
+            "Makati City", "Quezon City", "Makati City", "Quezon City", "Makati City", "Quezon City",
+            "Makati City", "Quezon City", "Makati City", "Quezon City", "Makati City", "Quezon City"};
+    private static String[] phoneNumbers = {"02 815-9454", "02 815-9454", "02 815-9454", "02 815-9454", "02 815-9454",
+            "02 815-9454", "02 815-9454", "02 815-9454", "02 815-9454", "02 815-9454",
+            "02 815-9454", "02 815-9454", "02 815-9454", "02 815-9454", "02 815-9454",
+            "02 815-9454", "02 815-9454", "02 815-9454", "02 815-9454", "02 815-9454",
+            "02 815-9454", "02 815-9454", "02 815-9454", "02 815-9454", "02 815-9454",
+            "02 815-9454", "02 815-9454", "02 815-9454", "02 815-9454", "02 815-9454",
+            "02 815-9454", "02 815-9454", "02 815-9454", "02 815-9454"};
+    private static String[] positions = {"Chief Executive Officer", "Chief Operating Officer", "Chief Finance Officer",
+            "Chief Marketing Officer", "IT Operations and Systems", "HR Manager",
+            "HR Team Leader", "HR Rank and File", "HR Rank and File", "Accounting Head",
+            "Payroll Manager", "Payroll Team Leader", "Payroll Rank and File",
+            "Payroll Rank and File", "Account Manager", "Account Team Leader",
+            "Account Team Leader", "Account Rank and File", "Account Rank and File",
+            "Account Rank and File", "Account Rank and File", "Account Rank and File",
+            "Account Rank and File", "Account Rank and File", "Account Rank and File",
+            "Account Rank and File", "Account Rank and File", "Account Rank and File",
+            "Account Rank and File", "Account Rank and File", "Account Rank and File",
+            "Account Rank and File", "Account Rank and File", "Account Rank and File",
+            "Account Rank and File", "Sales & Marketing", "Supply Chain and Logistics"};
+    private static double[] basicSalaries = {5500, 6500, 7500, 8500, 9500, 10500, 11500, 12500, 13500, 14500,
+            15500, 16500, 17500, 18500, 19500, 20500, 21500, 22500, 23500, 24500,
+            25500, 26500, 27500, 28500, 29500, 30500, 31500, 32500, 33500, 34500,
+            35500, 36500, 37500, 38500, 39500, 40500, 41500, 42500};
+    private static double[] hourlyRates = {100, 120, 140, 160, 180, 200, 220, 240, 260, 280,
+            300, 320, 340, 360, 380, 400, 420, 440, 460, 480,
+            500, 520, 540, 560, 580, 600, 620, 640, 660, 680,
+            700, 720, 740, 760, 780, 800, 820, 840};
+    private static String[] tinNumbers = {"10-123456789", "10-123456789", "10-123456789", "10-123456789", "10-123456789",
+            "10-123456789", "10-123456789", "10-123456789", "10-123456789", "10-123456789",
+            "10-123456789", "10-123456789", "10-123456789", "10-123456789", "10-123456789",
+            "10-123456789", "10-123456789", "10-123456789", "10-123456789", "10-123456789",
+            "10-123456789", "10-123456789", "10-123456789", "10-123456789", "10-123456789",
+            "10-123456789", "10-123456789", "10-123456789", "10-123456789", "10-123456789",
+            "10-123456789", "10-123456789", "10-123456789", "10-123456789", "10-123456789",
+            "10-123456789", "10-123456789"};
+    private static String[] pagIbigNumbers = {"101234567890", "101234567890", "101234567890", "101234567890", "101234567890",
+            "101234567890", "101234567890", "101234567890", "101234567890", "101234567890",
+            "101234567890", "101234567890", "101234567890", "101234567890", "101234567890",
+            "101234567890", "101234567890", "101234567890", "101234567890", "101234567890",
+            "101234567890", "101234567890", "101234567890", "101234567890", "101234567890",
+            "101234567890", "101234567890", "101234567890", "101234567890", "101234567890",
+            "101234567890", "101234567890", "101234567890", "101234567890", "101234567890",
+            "101234567890", "101234567890"};
+    private static String[] sssNumbers = {"1012345678", "1012345678", "1012345678", "1012345678", "1012345678",
+            "1012345678", "1012345678", "1012345678", "1012345678", "1012345678",
+            "1012345678", "1012345678", "1012345678", "1012345678", "1012345678",
+            "1012345678", "1012345678", "1012345678", "1012345678", "1012345678",
+            "1012345678", "1012345678", "1012345678", "1012345678", "1012345678",
+            "1012345678", "1012345678", "1012345678", "1012345678", "1012345678",
+            "1012345678", "1012345678", "1012345678", "1012345678", "1012345678",
+            "1012345678", "1012345678"};
+    private static String[] philhealthNumbers = {"123456789012", "123456789012", "123456789012", "123456789012", "123456789012",
+            "123456789012", "123456789012", "123456789012", "123456789012", "123456789012",
+            "123456789012", "123456789012", "123456789012", "123456789012", "123456789012",
+            "123456789012", "123456789012", "123456789012", "123456789012", "123456789012",
+            "123456789012", "123456789012", "123456789012", "123456789012", "123456789012",
+            "123456789012", "123456789012", "123456789012", "123456789012", "123456789012",
+            "123456789012", "123456789012", "123456789012", "123456789012", "123456789012",
+            "123456789012", "123456789012"};
+
+    // Database class
+    static class Database {
+        private Map<String, Employee> employees = new HashMap<>();
+
+        public void addEmployee(Employee employee) {
+            employees.put(employee.getEmployeeId(), employee);
+        }
+
+        public Employee getEmployeeById(String employeeId) {
+            return employees.get(employeeId);
+        }
+    }
+
+    // Employee class
+    static class Employee {
+        private String employeeId;
+        private String lastName;
+        private String firstName;
+        private Date birthDate;
+        private String address;
+        private String phoneNumber;
+        private String position;
+        private double basicSalary;
+        private double hourlyRate;
+        private String tinNumber;
+        private String pagIbigNumber;
+        private String sssNumber;
+        private String philhealthNumber;
+
+        public Employee(String employeeId, String lastName, String firstName, Date birthDate, String address,
+                        String phoneNumber, String position, double basicSalary, double hourlyRate,
+                        String tinNumber, String pagIbigNumber, String sssNumber, String philhealthNumber) {
+            this.employeeId = employeeId;
+            this.lastName = lastName;
+            this.firstName = firstName;
+            this.birthDate = birthDate;
+            this.address = address;
+            this.phoneNumber = phoneNumber;
+            this.position = position;
+            this.basicSalary = basicSalary;
+            this.hourlyRate = hourlyRate;
+            this.tinNumber = tinNumber;
+            this.pagIbigNumber = pagIbigNumber;
+            this.sssNumber = sssNumber;
+            this.philhealthNumber = philhealthNumber;
+        }
+
+        public String getEmployeeId() {
+            return employeeId;
+        }
+
+        public String getLastName() {
+            return lastName;
+        }
+
+        public String getFirstName() {
+            return firstName;
+        }
+
+        public Date getBirthDate() {
+            return birthDate;
+        }
+
+        public String getAddress() {
+            return address;
+        }
+
+        public String getPhoneNumber() {
+            return phoneNumber;
+        }
+
+        public String getPosition() {
+            return position;
+        }
+
+        public double getBasicSalary() {
+            return basicSalary;
+        }
+
+        public double getHourlyRate() {
+            return hourlyRate;
+        }
+
+        public String getTinNumber() {
+            return tinNumber;
+        }
+
+        public String getPagIbigNumber() {
+            return pagIbigNumber;
+        }
+
+        public String getSssNumber() {
+            return sssNumber;
+        }
+
+        public String getPhilhealthNumber() {
+            return philhealthNumber;
+        }
+
+        // Calculate monthly salary based on hours worked
+        public double calculateMonthlySalary(double hoursWorked) {
+            return basicSalary + (hoursWorked * hourlyRate);
+        }
+
+        // Calculate overtime pay
+        public double calculateOvertimePay(double hoursWorked) {
+            double overtimeHours = Math.max(hoursWorked - 8, 0);
+            return overtimeHours * hourlyRate * 1.5;
+        }
+
+        // Calculate PhilHealth deduction
+        public double calculatePhilHealthDeduction(double monthlySalary) {
+            return monthlySalary * 0.02;
+        }
+
+        // Calculate SSS contribution
+        public double calculateSSSContribution(double monthlySalary) {
+            // Simplified for demonstration
+            return monthlySalary * 0.03;
+        }
+
+        // Calculate Pag-IBIG contribution
+        public double calculatePagIbigContribution(double monthlySalary) {
+            // Simplified for demonstration
+            return monthlySalary * 0.02;
+        }
+
+        // Calculate withholding tax deduction
+        public double calculateWithholdingTaxDeduction(double monthlySalary) {
+            // Simplified for demonstration
+            return monthlySalary * 0.10;
+        }
+    }
+}
